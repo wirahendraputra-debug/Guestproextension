@@ -1,0 +1,35 @@
+      if (isNotesType) {
+        const addBtnWrap = document.createElement("div");
+        addBtnWrap.style.padding = "0 14px 10px 14px";
+        addBtnWrap.style.display = "flex";
+        addBtnWrap.style.justifyContent = "center";
+        addBtnWrap.style.background = "var(--bg)";
+        
+        const addBtn = document.createElement("button");
+        addBtn.innerHTML = "+ Add Request";
+        addBtn.className = "footer-btn";
+        addBtn.style.width = "100%";
+        addBtn.style.background = "var(--input-bg)";
+        addBtn.style.border = "1px dashed var(--primary)";
+        addBtn.style.color = "var(--primary)";
+        addBtn.style.padding = "8px";
+        addBtn.style.fontSize = "13px";
+        addBtn.style.cursor = "pointer";
+        addBtn.style.borderRadius = "4px";
+
+        addBtn.title = "Add New Request";
+        
+        addBtn.addEventListener("click", () => {
+          cat.items.push({
+            id: "req-" + Date.now(),
+            text: "",
+            note: "",
+            checked: true
+          });
+          saveData();
+          render();
+        });
+        
+        addBtnWrap.appendChild(addBtn);
+        catDiv.appendChild(addBtnWrap);
+      }

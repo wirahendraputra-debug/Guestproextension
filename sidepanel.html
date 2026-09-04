@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>GuestPro Training Checklist</title>
+<link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 1000;">
+    <button id="globalReloadBtn" class="icon-btn" title="Reload Extension" style="border:none; color:var(--primary); font-size:14px; padding:4px; background:transparent; display:flex; align-items:center; justify-content:center;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+    </button>
+    <button id="globalThemeBtn" class="icon-btn" title="Toggle Theme" style="border:none; color:var(--text-muted); font-size:14px; padding:4px; background:transparent; display:flex; align-items:center; justify-content:center;">
+      <svg id="globalThemeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+    <button id="globalCloseBtn" class="icon-btn" title="Close Widget" style="border:none; color:var(--red); font-weight:bold; font-size:14px; background:transparent;">✖</button>
+  </div>
+  
+  <div id="loginView" class="login-view">
+    <div class="login-header" style="text-align: center;">
+      <img src="https://www.guestpro.id/wp-content/uploads/2021/09/logo-guestpro-160x29.png" alt="GuestPro Logo" style="height: 32px; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto;" />
+      <h2 style="font-size:16px; margin:0; font-weight:500;">Trainer Login</h2>
+      <p style="margin-top:4px; font-size:13px; color:var(--text-muted);">Please log in to continue</p>
+    </div>
+    <form id="loginForm" class="login-form">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="loginUsername" required placeholder="Enter username" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" required placeholder="Enter password" />
+      </div>
+      <button type="submit" id="loginBtn" class="footer-btn primary" style="width:100%;">Login</button>
+      <div id="loginError" class="error-msg hidden">Invalid username or password.</div>
+    </form>
+    <p style="margin-top: 32px; font-size: 11px; color: var(--text-muted);">© 2026 Guestpro Team Project. All rights reserved</p>
+  </div>
+
+    <!-- SETUP VIEW -->
+  <div id="setupView" class="login-view hidden">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <img src="https://www.guestpro.id/wp-content/uploads/2021/09/logo-guestpro-160x29.png" alt="GuestPro Logo" style="height: 32px; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto;" />
+      <h2 style="margin:0; color:var(--primary-dark);">Start New Session</h2>
+      <p style="margin-top:4px; font-size:13px; color:var(--text-muted);">Configure the training details</p>
+    </div>
+    <form id="setupForm" class="login-form">
+        <div class="form-group autocomplete-container" style="position: relative;">
+          <label>Client / Hotel Name</label>
+          <input type="text" id="setupClientName" class="input-field" placeholder="e.g. Grand Hotel" required autocomplete="off" />
+          <div id="clientSuggestionsBox" class="autocomplete-items hidden"></div>
+        </div>
+      <div class="form-group">
+        <label>Package</label>
+        <select id="setupPackage" class="input-field" required>
+          <option value="">Loading packages...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status Training</label>
+        <select id="setupTrainingMethod" class="input-field" required>
+          <option value="Visit Training">Visit Training</option>
+          <option value="Online Training">Online Training</option>
+        </select>
+      </div>
+      <button type="submit" class="footer-btn primary" style="width:100%;">Start Training</button>
+    </form>
+    
+    <div style="margin-top: 16px; text-align: center; border-top: 1px solid var(--border); padding-top: 16px;">
+      <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 8px 0;">Need to change past records?</p>
+      <button id="showEditSessionBtn" class="footer-btn" style="width:100%; background: white; border: 1px solid var(--primary); color: var(--primary);">Edit Existing Session</button>
+    </div>
+
+    <p style="margin-top: 32px; font-size: 11px; color: var(--text-muted); text-align: center;">© 2026 Guestpro Team Project. All rights reserved</p>
+  </div>
+
+  <!-- EDIT SESSION VIEW -->
+  <div id="editSessionView" class="hidden" style="display: flex; flex-direction: column; height: 100vh; padding: 16px; background-color: var(--bg);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <button id="backToSetupBtn" class="icon-btn" style="border:none; background:transparent; color:var(--text-muted); font-size:14px; cursor:pointer; padding: 4px; width: 60px; text-align: left;">← Back</button>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <h2 style="margin:0; color:var(--primary-dark); font-size:16px;">Edit Session</h2>
+        <button id="refreshSessionsBtn" class="icon-btn" title="Refresh Sessions" style="border:none; background:transparent; color:var(--primary); font-size:14px; cursor:pointer; padding: 4px; display: flex; align-items: center; justify-content: center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 1 0 2.13-5.88L21 8"></path></svg>
+        </button>
+      </div>
+      <div style="width: 60px;"></div> <!-- Spacer for exact centering -->
+    </div>
+    
+    <div style="margin-bottom: 16px;">
+      <input type="text" id="searchSessionInput" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; box-sizing: border-box; font-family: inherit; background-color: var(--input-bg); color: var(--text);" placeholder="Search by Client Name..." autocomplete="off" />
+    </div>
+
+    <div id="sessionListContainer" style="display: flex; flex-direction: column; gap: 0; overflow-y: auto; flex: 1; padding-bottom: 20px;">
+      <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">Loading your sessions...</div>
+    </div>
+  </div>
+
+  <!-- APP VIEW -->
+  <div id="appView" class="view hidden">
+    <header class="app-header">
+      <div class="title-row" style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="https://www.guestpro.id/wp-content/uploads/2021/09/logo-guestpro-160x29.png" alt="GuestPro Logo" style="height: 24px;" />
+          <h1 style="margin: 0;">Training Checklist</h1>
+        </div>
+      </div>
+      <div style="background:var(--primary-light); padding:12px; border-radius:6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:11px; color:var(--text-muted);">Currently training:</div>
+          <div id="displayClientName" style="font-weight:600; font-size:13px; color:var(--primary-dark);">Client Name</div>
+          <div id="displayPackageName" style="font-size:11px; color:var(--primary); margin-top:2px; font-weight:500;"></div>
+        </div>
+        <div id="sessionTimer" style="font-size:13px; font-weight:600; color:var(--primary-dark); font-family:monospace;">
+          00:00:00
+        </div>
+      </div>
+      <div class="search-box" style="display: flex; gap: 8px; align-items: center;">
+        <input type="text" id="searchInput" placeholder="Search module items..." style="flex: 1;" />
+        <button id="modeToggleBtn" class="icon-btn" title="Toggle Notion Mode" style="border:1px solid var(--border); border-radius: 4px; background:var(--input-bg); color:var(--text); font-size:12px; padding: 6px 10px; cursor:pointer; flex-shrink: 0;">
+           📝 Notion Mode
+        </button>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+        <span id="progressLabel">0 / 0 completed</span>
+      </div>
+    </header>
+
+    <main id="checklistContainer" class="checklist-container"></main>
+
+    <main id="notionContainer" class="checklist-container hidden">
+      <div id="editorjs" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; min-height: 400px; color: var(--text);"></div>
+    </main>
+
+    <div id="checklistFooter" style="padding: 0 14px 10px; flex-shrink: 0; background: var(--bg);">
+      <div id="requestsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;"></div>
+      <button id="addRequestBtn" type="button" class="footer-btn" style="width: 100%; background: var(--input-bg); border: 1px dashed var(--green); color: var(--green); margin-bottom: 8px; padding: 8px; font-size: 13px; cursor: pointer;">+ Add Request</button>
+      
+      <div id="customNotesList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;"></div>
+      <button id="addCustomNoteBtn" type="button" class="footer-btn" style="width: 100%; background: var(--input-bg); border: 1px dashed var(--primary); color: var(--primary); margin-bottom: 8px; padding: 8px; font-size: 13px; cursor: pointer;">+ Add Custom Note</button>
+      <textarea id="additionalNoteInput" placeholder="General additional notes (optional)..." style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; background: var(--input-bg); color: var(--text); box-sizing: border-box; outline: none; min-height: 80px; resize: vertical;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+    </div>
+
+    <footer class="app-footer">
+      <button id="finishSessionBtn" class="footer-btn primary" title="Save this session to history">Save & Finish</button>
+      <button id="cancelSessionBtn" class="footer-btn danger" title="Cancel and save to history with Cancelled status">Cancel</button>
+    </footer>
+  </div>
+
+  <!-- Image Preview Modal -->
+  <div id="imageModal" class="image-modal-backdrop" style="display: none;">
+    <div class="image-modal-content">
+      <span id="closeImageModal" class="image-modal-close">&times;</span>
+      <img id="imageModalSrc" src="" alt="Full Preview" />
+    </div>
+  </div>
+
+  <script src="libs/editor.js"></script>
+  <script src="libs/header.js"></script>
+  <script src="libs/list.js"></script>
+  <script src="libs/simple-image.js"></script>
+  <script src="libs/checklist.js"></script>
+  <script src="libs/quote.js"></script>
+  <script src="libs/warning.js"></script>
+  <script src="libs/delimiter.js"></script>
+  <script src="libs/marker.js"></script>
+  <script src="libs/table.js"></script>
+  <script src="libs/toggle-block.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

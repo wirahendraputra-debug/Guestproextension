@@ -1,0 +1,41 @@
+#guestpro-widget-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  cursor: pointer;
+  z-index: 2147483646; /* Satu tingkat di bawah iframe */
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#guestpro-widget-btn:hover {
+  transform: scale(1.05);
+  background-color: #059669;
+}
+
+#guestpro-widget-iframe {
+  position: fixed;
+  top: 0; /* Flush to top */
+  right: -55vw; /* Sembunyikan di luar layar awalnya */
+  width: 50vw;
+  height: 100vh; /* Full height */
+  border: none;
+  border-radius: 0; /* Flush to edge */
+  box-shadow: -5px 0 30px rgba(0, 0, 0, 0.2);
+  z-index: 2147483647; /* Z-index tertinggi agar selalu di atas */
+  transition: right 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: white;
+  color-scheme: light; /* Pastikan selalu terang */
+}
+
+#guestpro-widget-iframe.guestpro-show {
+  right: 0; /* Munculkan ke dalam layar tanpa margin kanan */
+}

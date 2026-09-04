@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "GuestPro Training Checklist",
+  "version": "1.0",
+  "description": "Checklist interaktif untuk sesi training GuestPro PMS agar tidak ada modul yang terlewat.",
+  "permissions": ["storage", "downloads", "geolocation"],
+  "action": {
+    "default_title": "Buka Training Checklist",
+    "default_icon": {
+      "16": "icons/Logo-GP.png",
+      "48": "icons/Logo-GP.png",
+      "128": "icons/Logo-GP.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://cloud-pms.guestpro.id/*",
+        "*://revenue-booster.guestpro.net/*",
+        "*://cloud.orderbil.com/*",
+        "*://cloud-pms-cgk.guestpro.id/*"
+      ],
+      "css": ["content.css"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["sidepanel.html", "sidepanel.css", "sidepanel.js", "supabase-config.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "host_permissions": [
+    "https://bsbzfbyakexjxbcsceuk.supabase.co/*"
+  ],
+  "icons": {
+    "16": "icons/Logo-GP.png",
+    "48": "icons/Logo-GP.png",
+    "128": "icons/Logo-GP.png"
+  }
+}

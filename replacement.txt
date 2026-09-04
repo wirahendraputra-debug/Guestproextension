@@ -1,0 +1,242 @@
+filteredItems.forEach((item) => {
+      const wrapper = document.createElement("div");
+      
+      if (isNotesType) {
+        wrapper.style.display = "flex";
+        wrapper.style.flexDirection = "column";
+        wrapper.style.gap = "4px";
+        wrapper.style.padding = "8px";
+        wrapper.style.border = "1px solid var(--border)";
+        wrapper.style.borderRadius = "6px";
+        wrapper.style.background = "var(--bg)";
+        wrapper.style.marginBottom = "8px";
+
+        const headerRow = document.createElement("div");
+        headerRow.style.display = "flex";
+        headerRow.style.justifyContent = "space-between";
+        headerRow.style.alignItems = "center";
+
+        const titleInput = document.createElement("input");
+        titleInput.type = "text";
+        titleInput.placeholder = "Request title...";
+        titleInput.value = item.text || "";
+        titleInput.style.flex = "1";
+        titleInput.style.padding = "6px";
+        titleInput.style.border = "1px solid var(--border)";
+        titleInput.style.borderRadius = "4px";
+        titleInput.style.fontSize = "13px";
+        titleInput.style.background = "var(--input-bg)";
+        titleInput.style.color = "var(--text)";
+        titleInput.addEventListener("input", (e) => {
+          item.text = e.target.value;
+          saveData();
+        });
+
+        const delBtn = document.createElement("button");
+        delBtn.innerHTML = "&times;";
+        delBtn.title = "Hapus request ini";
+        delBtn.style.background = "transparent";
+        delBtn.style.border = "none";
+        delBtn.style.color = "var(--red)";
+        delBtn.style.fontSize = "14px";
+        delBtn.style.cursor = "pointer";
+        delBtn.style.marginLeft = "8px";
+        delBtn.addEventListener("click", () => {
+          if(confirm("Hapus request ini?")) {
+            cat.items = cat.items.filter(i => i.id !== item.id);
+            saveData();
+            render();
+          }
+        });
+
+        headerRow.appendChild(titleInput);
+        headerRow.appendChild(delBtn);
+
+        const noteInput = document.createElement("textarea");
+        noteInput.placeholder = "Isi catatan khusus (wajib)...";
+        noteInput.value = item.note || "";
+        noteInput.rows = 2;
+        noteInput.style.padding = "6px";
+        noteInput.style.border = "1px solid var(--border)";
+        noteInput.style.borderRadius = "4px";
+        noteInput.style.fontSize = "13px";
+        noteInput.style.resize = "vertical";
+        noteInput.style.background = "var(--input-bg)";
+        noteInput.style.color = "var(--text)";
+        noteInput.addEventListener("input", (e) => {
+          item.note = e.target.value;
+          saveData();
+        });
+
+        noteInput.addEventListener("paste", async (e) => {
+          const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+          for (let idx = 0; idx < items.length; idx++) {
+            if (items[idx].type.indexOf("image") === 0) {
+              e.preventDefault();
+              const file = items[idx].getAsFile();
+              const submitBtn = el("finishSessionBtn");
+              const oldText = submitBtn ? submitBtn.innerText : "";
+              if (submitBtn) { submitBtn.innerText = "Processing Image..."; submitBtn.disabled = true; }
+              
+              try {
+                const base64Str = await compressImage(file);
+                item.attachedImages = item.attachedImages || [];
+                item.attachedImages.push(base64Str);
+                saveData();
+                render();
+              } catch (err) {
+                alert("Gagal memproses gambar");
+              } finally {
+                if (submitBtn) { submitBtn.innerText = oldText; submitBtn.disabled = false; }
+              }
+              break; 
+            }
+          }
+        });
+
+        wrapper.appendChild(headerRow);
+        wrapper.appendChild(noteInput);
+
+        // Render Image Previews
+        if (item.attachedImages && item.attachedImages.length > 0) {
+          const previewWrap = document.createElement("div");
+          previewWrap.style.display = "flex";
+          previewWrap.style.flexWrap = "wrap";
+          previewWrap.style.gap = "8px";
+          previewWrap.style.marginTop = "8px";
+          
+          item.attachedImages.forEach((b64, imgIdx) => {
+            const imgCont = document.createElement("div");
+            imgCont.className = "image-preview-container";
+            
+            const imgEl = document.createElement("img");
+            imgEl.src = b64;
+            imgEl.className = "image-preview-thumbnail";
+            imgEl.addEventListener("click", () => openImageModal(b64));
+            
+            const rmBtn = document.createElement("button");
+            rmBtn.className = "btn-remove-image";
+            rmBtn.innerHTML = "&times;";
+            rmBtn.addEventListener("click", (e) => {
+               e.stopPropagation();
+               item.attachedImages.splice(imgIdx, 1);
+               saveData();
+               render();
+            });
+            
+            imgCont.appendChild(imgEl);
+            imgCont.appendChild(rmBtn);
+            previewWrap.appendChild(imgCont);
+          });
+          wrapper.appendChild(previewWrap);
+        }
+
+      } else {
+        wrapper.className = "item-wrapper";
+
+        const row = document.createElement("div");
+        row.className = "item-row" + (item.checked ? " checked" : "");
+
+        const content = document.createElement("div");
+        content.className = "item-content";
+        const mandatoryMark = item.isMandatory ? `<span style="color:#ef4444; margin-left:4px; font-weight:bold;" title="Wajib diisi catatan jika dicentang">*</span>` : "";
+        
+        content.innerHTML = `
+          <input type="checkbox" data-cat="${cat.id}" data-item="${item.id}" ${item.checked ? "checked" : ""} />
+          <span class="item-text" data-cat="${cat.id}" data-item="${item.id}">${escapeHtml(item.text)}${mandatoryMark}</span>
+        `;
+
+        row.appendChild(content);
+
+        const noteBtn = document.createElement("button");
+        noteBtn.className = "note-btn" + (item.showNote || item.note ? " active" : "");
+        noteBtn.innerHTML = "📝";
+        noteBtn.title = "Add Note";
+        noteBtn.addEventListener("click", () => {
+          item.showNote = !item.showNote;
+          saveData();
+          render();
+        });
+        row.appendChild(noteBtn);
+        
+        wrapper.appendChild(row);
+
+        const noteBox = document.createElement("div");
+        noteBox.className = "note-box" + (item.showNote || item.note ? " show" : "");
+
+        const textarea = document.createElement("textarea");
+        textarea.placeholder = "Note (optional)...";
+        textarea.value = item.note || "";
+        textarea.rows = 2;
+        textarea.addEventListener("input", (e) => {
+          item.note = e.target.value;
+          saveData();
+        });
+        
+        textarea.addEventListener("paste", async (e) => {
+          const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+          for (let idx = 0; idx < items.length; idx++) {
+            if (items[idx].type.indexOf("image") === 0) {
+              e.preventDefault();
+              const file = items[idx].getAsFile();
+              const submitBtn = el("finishSessionBtn");
+              const oldText = submitBtn ? submitBtn.innerText : "";
+              if (submitBtn) { submitBtn.innerText = "Processing Image..."; submitBtn.disabled = true; }
+              
+              try {
+                const base64Str = await compressImage(file);
+                item.attachedImages = item.attachedImages || [];
+                item.attachedImages.push(base64Str);
+                saveData();
+                render();
+              } catch (err) {
+                alert("Gagal memproses gambar");
+              } finally {
+                if (submitBtn) { submitBtn.innerText = oldText; submitBtn.disabled = false; }
+              }
+              break; 
+            }
+          }
+        });
+        
+        noteBox.appendChild(textarea);
+        
+        // Render Image Previews
+        if (item.attachedImages && item.attachedImages.length > 0) {
+          const previewWrap = document.createElement("div");
+          previewWrap.style.display = "flex";
+          previewWrap.style.flexWrap = "wrap";
+          previewWrap.style.gap = "8px";
+          previewWrap.style.marginTop = "8px";
+          
+          item.attachedImages.forEach((b64, imgIdx) => {
+            const imgCont = document.createElement("div");
+            imgCont.className = "image-preview-container";
+            
+            const imgEl = document.createElement("img");
+            imgEl.src = b64;
+            imgEl.className = "image-preview-thumbnail";
+            imgEl.addEventListener("click", () => openImageModal(b64));
+            
+            const rmBtn = document.createElement("button");
+            rmBtn.className = "btn-remove-image";
+            rmBtn.innerHTML = "&times;";
+            rmBtn.addEventListener("click", (e) => {
+               e.stopPropagation();
+               item.attachedImages.splice(imgIdx, 1);
+               saveData();
+               render();
+            });
+            
+            imgCont.appendChild(imgEl);
+            imgCont.appendChild(rmBtn);
+            previewWrap.appendChild(imgCont);
+          });
+          noteBox.appendChild(previewWrap);
+        }
+        
+        wrapper.appendChild(noteBox);
+      }
+
+      itemList.appendChild(wrapper);
+    });
