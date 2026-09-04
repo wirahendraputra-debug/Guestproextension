@@ -1213,8 +1213,8 @@ function toggleItem(catId, itemId, checked) {
 if (el("loginForm")) {
   el("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const username = el("loginUsername").value;
-    const password = el("loginPassword").value;
+    const username = el("loginUsername").value.trim();
+    const password = el("loginPassword").value.trim();
     const btn = el("loginBtn");
     const err = el("loginError");
     
@@ -1222,7 +1222,12 @@ if (el("loginForm")) {
       btn.textContent = "Loading...";
       btn.disabled = true;
       
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/admin_users?select=id,username,password,name&username=eq.${username}`, { headers: supabaseHeaders });
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/admin_users?select=id,username,password,name&username=eq.${encodeURIComponent(username)}`, { headers: supabaseHeaders });
+      
+      if (!res.ok) {
+        throw new Error(`Server returned HTTP ${res.status}`);
+      }
+      
       const data = await res.json();
       
       if (data && data.length > 0 && data[0].password === password) {
