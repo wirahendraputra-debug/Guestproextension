@@ -1922,6 +1922,12 @@ async function loadTrainerSessions() {
   if (!container) return;
   container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">Loading your sessions...</div>';
   
+  const refreshBtn = el("refreshSessionsBtn");
+  const refreshSvg = refreshBtn ? refreshBtn.querySelector("svg") : null;
+  if (refreshSvg) {
+    refreshSvg.classList.add("spin-animation");
+  }
+  
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/sessions?trainer_name=ilike.${session.trainerName}&order=created_at.desc`, {
       headers: supabaseHeaders
@@ -1929,9 +1935,20 @@ async function loadTrainerSessions() {
     const data = await res.json();
     allTrainerSessions = data || [];
     renderSessionList(allTrainerSessions);
+    
+    if (refreshSvg) {
+      refreshSvg.style.color = "var(--green, #22c55e)";
+      setTimeout(() => {
+        refreshSvg.style.color = "";
+      }, 1000);
+    }
   } catch (e) {
     console.error(e);
     container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--red); font-size: 13px;">Failed to load sessions.</div>';
+  } finally {
+    if (refreshSvg) {
+      refreshSvg.classList.remove("spin-animation");
+    }
   }
 }
 

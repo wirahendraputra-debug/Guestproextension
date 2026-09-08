@@ -597,3 +597,12 @@ body {
   flex-direction: column;
   height: 100vh;
 }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-animation {
+  animation: spin 1s linear infinite;
+}
