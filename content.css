@@ -26,6 +26,8 @@
   top: 0; /* Flush to top */
   right: -55vw; /* Sembunyikan di luar layar awalnya */
   width: 50vw;
+  min-width: min(360px, 100vw);
+  max-width: 100vw;
   height: 100vh; /* Full height */
   border: none;
   border-radius: 0; /* Flush to edge */
@@ -38,4 +40,11 @@
 
 #guestpro-widget-iframe.guestpro-show {
   right: 0; /* Munculkan ke dalam layar tanpa margin kanan */
+}
+
+@media (max-width: 768px) {
+  #guestpro-widget-iframe {
+    width: 100vw;
+    right: -105vw;
+  }
 }

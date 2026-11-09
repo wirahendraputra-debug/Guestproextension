@@ -334,7 +334,18 @@ function saveSession() {
 }
 
 // ====== Rendering ======
+function closeAllStatusMenus() {
+  document.querySelectorAll('.status-menu').forEach(m => {
+    m.classList.remove('open-up');
+  });
+  document.querySelectorAll('.dropdown-open').forEach(node => {
+    node.classList.remove('dropdown-open');
+  });
+}
+
 function render() {
+  const scrollArea = el("appScrollArea");
+  const prevScrollTop = scrollArea ? scrollArea.scrollTop : 0;
   const container = el("checklistContainer");
   container.innerHTML = "";
 
@@ -399,6 +410,7 @@ function render() {
         titleInput.placeholder = "Request title...";
         titleInput.value = item.text || "";
         titleInput.style.flex = "1";
+        titleInput.style.minWidth = "0";
         titleInput.style.padding = "6px";
         titleInput.style.border = "1px solid var(--border)";
         titleInput.style.borderRadius = "4px";
@@ -513,7 +525,7 @@ function render() {
         wrapper.className = "item-wrapper";
 
         const row = document.createElement("div");
-        row.className = "item-row" + ((item.checked || item.statusValue) ? " checked" : "");
+        row.className = "item-row" + (isStatusType ? " status-row" : "") + ((item.checked || item.statusValue) ? " checked" : "");
 
         const content = document.createElement("div");
         content.className = "item-content";
@@ -522,63 +534,50 @@ function render() {
         if (isStatusType) {
           let bgColor = 'var(--input-bg)';
           let textColor = 'var(--text-muted)';
+          let borderColor = 'var(--border)';
           let displayValue = 'Status...';
           
           if (item.statusValue === 'Done') {
             bgColor = 'rgba(34, 197, 94, 0.15)';
             textColor = '#16a34a';
+            borderColor = 'rgba(34, 197, 94, 0.3)';
             displayValue = 'Done';
           } else if (item.statusValue === 'No Use') {
             bgColor = 'rgba(107, 114, 128, 0.15)';
-            textColor = '#4b5563';
+            textColor = '#6b7280';
+            borderColor = 'rgba(107, 114, 128, 0.3)';
             displayValue = 'No Use';
           } else if (item.statusValue === 'Followup') {
             bgColor = 'rgba(245, 158, 11, 0.15)';
             textColor = '#d97706';
+            borderColor = 'rgba(245, 158, 11, 0.3)';
             displayValue = 'Followup';
           }
 
           content.innerHTML = `
-            <span class="item-text" data-cat="${cat.id}" data-item="${item.id}" style="cursor: default; flex: 1;">${escapeHtml(item.text)}${mandatoryMark}</span>
-            <div class="custom-status-dropdown" style="position: relative; display: inline-block; user-select: none;">
-              <div class="status-pill" data-cat="${cat.id}" data-item="${item.id}" style="
-                padding: 4px 24px 4px 12px; 
-                border-radius: 14px; 
-                border: 1px solid transparent; 
-                background: ${bgColor} url('data:image/svg+xml;utf8,<svg width=\\'12\\' height=\\'12\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'${textColor.replace('#','%23')}\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'><polyline points=\\'6 9 12 15 18 9\\'></polyline></svg>') no-repeat right 8px center;
-                color: ${textColor}; 
-                font-size: 12px;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                min-width: 80px;
-                text-align: left;
-              ">${displayValue}</div>
+            <span class="item-text" data-cat="${cat.id}" data-item="${item.id}" style="cursor: default;">${escapeHtml(item.text)}${mandatoryMark}</span>
+            <div class="custom-status-dropdown">
+              <div class="status-pill" data-cat="${cat.id}" data-item="${item.id}" style="background: ${bgColor}; color: ${textColor}; border-color: ${borderColor};">
+                <span>${displayValue}</span>
+                <svg class="status-pill-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
               
-              <div class="status-menu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; width: 130px; padding: 4px; display: flex; flex-direction: column; gap: 2px;">
-                <div class="status-option" data-value="" data-cat="${cat.id}" data-item="${item.id}" style="padding: 6px 8px; font-size: 12px; cursor: pointer; border-radius: 4px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
-                   <div style="width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--text-muted);"></div> Kosongkan
+              <div class="status-menu">
+                <div class="status-option${!item.statusValue ? ' selected' : ''}" data-value="" data-cat="${cat.id}" data-item="${item.id}" style="color: var(--text-muted);">
+                   <span style="width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--text-muted); flex-shrink: 0;"></span> Kosongkan
                 </div>
-                <div class="status-option" data-value="Done" data-cat="${cat.id}" data-item="${item.id}" style="padding: 6px 8px; font-size: 12px; cursor: pointer; border-radius: 4px; color: var(--text); display: flex; align-items: center; gap: 8px;">
-                   <div style="width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></div> Done
+                <div class="status-option${item.statusValue === 'Done' ? ' selected' : ''}" data-value="Done" data-cat="${cat.id}" data-item="${item.id}">
+                   <span style="width: 8px; height: 8px; border-radius: 50%; background: #16a34a; flex-shrink: 0;"></span> Done
                 </div>
-                <div class="status-option" data-value="No Use" data-cat="${cat.id}" data-item="${item.id}" style="padding: 6px 8px; font-size: 12px; cursor: pointer; border-radius: 4px; color: var(--text); display: flex; align-items: center; gap: 8px;">
-                   <div style="width: 8px; height: 8px; border-radius: 50%; background: #4b5563;"></div> No Use
+                <div class="status-option${item.statusValue === 'No Use' ? ' selected' : ''}" data-value="No Use" data-cat="${cat.id}" data-item="${item.id}">
+                   <span style="width: 8px; height: 8px; border-radius: 50%; background: #6b7280; flex-shrink: 0;"></span> No Use
                 </div>
-                <div class="status-option" data-value="Followup" data-cat="${cat.id}" data-item="${item.id}" style="padding: 6px 8px; font-size: 12px; cursor: pointer; border-radius: 4px; color: var(--text); display: flex; align-items: center; gap: 8px;">
-                   <div style="width: 8px; height: 8px; border-radius: 50%; background: #d97706;"></div> Followup
+                <div class="status-option${item.statusValue === 'Followup' ? ' selected' : ''}" data-value="Followup" data-cat="${cat.id}" data-item="${item.id}">
+                   <span style="width: 8px; height: 8px; border-radius: 50%; background: #d97706; flex-shrink: 0;"></span> Followup
                 </div>
               </div>
             </div>
           `;
-          
-          // Note: we initially hide the menu, but wait, setting display:none in style attribute makes it hard to toggle via class if we want.
-          // I will use display: none inline, and JS will change it to 'flex'.
-          // To fix the HTML template, I removed the inline display: none and will rely on a class or inline style toggled by JS. Let's keep display:none inline.
-          // Wait, I will just set display:none inline initially.
-          
-          // Let's replace the inline display:none with a specific style block.
-          content.querySelector('.status-menu').style.display = 'none';
         } else {
           content.innerHTML = `
             <input type="checkbox" data-cat="${cat.id}" data-item="${item.id}" ${item.checked ? "checked" : ""} />
@@ -690,6 +689,7 @@ function render() {
         addBtnWrap.style.display = "flex";
         addBtnWrap.style.justifyContent = "center";
         addBtnWrap.style.background = "var(--bg)";
+        addBtnWrap.style.borderRadius = "0 0 7px 7px";
         
         const addBtn = document.createElement("button");
         addBtn.innerHTML = "+ Add Request";
@@ -731,6 +731,9 @@ function render() {
 
   attachDynamicListeners();
   renderCustomNotes();
+  if (scrollArea && prevScrollTop > 0) {
+    scrollArea.scrollTop = prevScrollTop;
+  }
 }
 
 
@@ -761,6 +764,7 @@ function renderRequests() {
     titleInput.placeholder = "Request title...";
     titleInput.value = req.title || "";
     titleInput.style.flex = "1";
+    titleInput.style.minWidth = "0";
     titleInput.style.padding = "6px";
     titleInput.style.border = "1px solid var(--border)";
     titleInput.style.borderRadius = "4px";
@@ -903,6 +907,7 @@ function renderCustomNotes() {
     titleInput.placeholder = "Judul Catatan Khusus...";
     titleInput.value = cn.title || "";
     titleInput.style.flex = "1";
+    titleInput.style.minWidth = "0";
     titleInput.style.padding = "6px";
     titleInput.style.border = "1px solid var(--border)";
     titleInput.style.borderRadius = "4px";
@@ -1032,17 +1037,42 @@ function attachDynamicListeners() {
 
   document.querySelectorAll('.status-pill').forEach((pill) => {
     pill.addEventListener("click", (e) => {
-      // Close all others
-      document.querySelectorAll('.status-menu').forEach(m => {
-        if (m !== pill.nextElementSibling) m.style.display = 'none';
-      });
-      const menu = pill.nextElementSibling;
-      menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+      e.stopPropagation();
+      const dropdown = pill.closest('.custom-status-dropdown');
+      const menu = dropdown ? dropdown.querySelector('.status-menu') : pill.nextElementSibling;
+      const isCurrentlyOpen = dropdown ? dropdown.classList.contains('dropdown-open') : false;
+
+      closeAllStatusMenus();
+
+      if (!isCurrentlyOpen && dropdown && menu) {
+        const row = pill.closest('.item-row');
+        const wrapper = pill.closest('.item-wrapper');
+        const category = pill.closest('.category');
+
+        dropdown.classList.add('dropdown-open');
+        if (row) row.classList.add('dropdown-open');
+        if (wrapper) wrapper.classList.add('dropdown-open');
+        if (category) category.classList.add('dropdown-open');
+
+        const scrollArea = el('appScrollArea') || el('checklistContainer');
+        const pillRect = pill.getBoundingClientRect();
+        const menuHeight = menu.offsetHeight || 150;
+        const bounds = scrollArea ? scrollArea.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
+        const spaceBelow = Math.min(bounds.bottom, window.innerHeight) - pillRect.bottom;
+        const spaceAbove = pillRect.top - Math.max(bounds.top, 0);
+
+        if (spaceBelow < menuHeight + 10 && spaceAbove > spaceBelow) {
+          menu.classList.add('open-up');
+        } else {
+          menu.classList.remove('open-up');
+        }
+      }
     });
   });
 
   document.querySelectorAll('.status-option').forEach((opt) => {
     opt.addEventListener("click", (e) => {
+      e.stopPropagation();
       const catId = opt.dataset.cat;
       const itemId = opt.dataset.item;
       const val = opt.dataset.value;
@@ -1050,6 +1080,7 @@ function attachDynamicListeners() {
       const item = cat.items.find((i) => i.id === itemId);
       item.statusValue = val;
       item.checked = (val === "Done");
+      closeAllStatusMenus();
       saveData();
       render();
     });
@@ -1964,7 +1995,7 @@ function renderSessionList(sessionsToRender) {
   
   sessionsToRender.forEach(sess => {
     const card = document.createElement("div");
-    card.style.cssText = "padding: 12px 10px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; display: flex; justify-content: space-between; align-items: center;";
+    card.style.cssText = "padding: 12px 10px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; display: flex; justify-content: space-between; align-items: center; gap: 8px;";
     card.onmouseover = () => card.style.backgroundColor = "var(--hover-bg)";
     card.onmouseout = () => card.style.backgroundColor = "transparent";
     
@@ -1985,12 +2016,12 @@ function renderSessionList(sessionsToRender) {
     const statusColor = sess.status === 'Cancelled' ? 'var(--red)' : 'var(--green)';
     
     card.innerHTML = `
-      <div>
-        <div style="font-weight: 600; font-size: 13px; color: var(--text-main); margin-bottom: 2px;">${displayClientName}</div>
-        <div style="font-size: 11px; color: var(--primary); font-weight: 500;">${packagePart}</div>
+      <div style="min-width: 0; flex: 1;">
+        <div style="font-weight: 600; font-size: 13px; color: var(--text-main); margin-bottom: 2px; overflow-wrap: anywhere;">${displayClientName}</div>
+        <div style="font-size: 11px; color: var(--primary); font-weight: 500; overflow-wrap: anywhere;">${packagePart}</div>
         <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">${sess.session_date} • <span style="color: ${statusColor};">${sess.status || 'Completed'}</span></div>
       </div>
-      <div style="display: flex; gap: 4px;">
+      <div style="display: flex; gap: 4px; flex-shrink: 0;">
         <button class="icon-btn share-btn" style="color: var(--primary); border: none; font-size: 14px; padding: 4px; display: flex; align-items: center;" title="Copy Public Share Link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
         </button>
@@ -2281,7 +2312,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global click listener to close custom dropdown menus
   document.addEventListener("click", (e) => {
     if (!e.target.closest('.custom-status-dropdown')) {
-      document.querySelectorAll('.status-menu').forEach(m => m.style.display = 'none');
+      closeAllStatusMenus();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeAllStatusMenus();
     }
   });
 });

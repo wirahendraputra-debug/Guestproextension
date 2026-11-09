@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="sidepanel.css" />
 </head>
 <body>
-  <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 1000;">
+  <div class="global-controls">
     <button id="globalReloadBtn" class="icon-btn" title="Reload Extension" style="border:none; color:var(--primary); font-size:14px; padding:4px; background:transparent; display:flex; align-items:center; justify-content:center;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
     </button>
@@ -75,7 +75,7 @@
   </div>
 
   <!-- EDIT SESSION VIEW -->
-  <div id="editSessionView" class="hidden" style="display: flex; flex-direction: column; height: 100vh; padding: 16px; background-color: var(--bg);">
+  <div id="editSessionView" class="edit-session-view hidden">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
       <button id="backToSetupBtn" class="icon-btn" style="border:none; background:transparent; color:var(--text-muted); font-size:14px; cursor:pointer; padding: 4px; width: 60px; text-align: left;">← Back</button>
       <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
@@ -97,27 +97,27 @@
   </div>
 
   <!-- APP VIEW -->
-  <div id="appView" class="view hidden">
+  <div id="appView" class="app-view hidden">
     <header class="app-header">
-      <div class="title-row" style="display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="https://www.guestpro.id/wp-content/uploads/2021/09/logo-guestpro-160x29.png" alt="GuestPro Logo" style="height: 24px;" />
-          <h1 style="margin: 0;">Training Checklist</h1>
+      <div class="title-row">
+        <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+          <img src="https://www.guestpro.id/wp-content/uploads/2021/09/logo-guestpro-160x29.png" alt="GuestPro Logo" style="height: 24px; flex-shrink: 0;" />
+          <h1 style="margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Training Checklist</h1>
         </div>
       </div>
-      <div style="background:var(--primary-light); padding:12px; border-radius:6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-        <div>
+      <div style="background:var(--primary-light); padding:12px; border-radius:6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap: 10px;">
+        <div style="min-width: 0; flex: 1;">
           <div style="font-size:11px; color:var(--text-muted);">Currently training:</div>
-          <div id="displayClientName" style="font-weight:600; font-size:13px; color:var(--primary-dark);">Client Name</div>
-          <div id="displayPackageName" style="font-size:11px; color:var(--primary); margin-top:2px; font-weight:500;"></div>
+          <div id="displayClientName" style="font-weight:600; font-size:13px; color:var(--primary-dark); overflow-wrap: anywhere;">Client Name</div>
+          <div id="displayPackageName" style="font-size:11px; color:var(--primary); margin-top:2px; font-weight:500; overflow-wrap: anywhere;"></div>
         </div>
-        <div id="sessionTimer" style="font-size:13px; font-weight:600; color:var(--primary-dark); font-family:monospace;">
+        <div id="sessionTimer" style="font-size:13px; font-weight:600; color:var(--primary-dark); font-family:monospace; flex-shrink: 0;">
           00:00:00
         </div>
       </div>
       <div class="search-box" style="display: flex; gap: 8px; align-items: center;">
-        <input type="text" id="searchInput" placeholder="Search module items..." style="flex: 1;" />
-        <button id="modeToggleBtn" class="icon-btn" title="Toggle Notion Mode" style="border:1px solid var(--border); border-radius: 4px; background:var(--input-bg); color:var(--text); font-size:12px; padding: 6px 10px; cursor:pointer; flex-shrink: 0;">
+        <input type="text" id="searchInput" placeholder="Search module items..." style="flex: 1; min-width: 0;" />
+        <button id="modeToggleBtn" class="icon-btn" title="Toggle Notion Mode" style="border:1px solid var(--border); border-radius: 4px; background:var(--input-bg); color:var(--text); font-size:12px; padding: 6px 10px; cursor:pointer; flex-shrink: 0; white-space: nowrap;">
            📝 Notion Mode
         </button>
       </div>
@@ -127,19 +127,21 @@
       </div>
     </header>
 
-    <main id="checklistContainer" class="checklist-container"></main>
+    <div id="appScrollArea" class="app-scroll-area">
+      <main id="checklistContainer" class="checklist-container"></main>
 
-    <main id="notionContainer" class="checklist-container hidden">
-      <div id="editorjs" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; min-height: 400px; color: var(--text);"></div>
-    </main>
+      <main id="notionContainer" class="checklist-container hidden">
+        <div id="editorjs" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; min-height: 400px; color: var(--text);"></div>
+      </main>
 
-    <div id="checklistFooter" style="padding: 0 14px 10px; flex-shrink: 0; background: var(--bg);">
-      <div id="requestsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;"></div>
-      <button id="addRequestBtn" type="button" class="footer-btn" style="width: 100%; background: var(--input-bg); border: 1px dashed var(--green); color: var(--green); margin-bottom: 8px; padding: 8px; font-size: 13px; cursor: pointer;">+ Add Request</button>
-      
-      <div id="customNotesList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;"></div>
-      <button id="addCustomNoteBtn" type="button" class="footer-btn" style="width: 100%; background: var(--input-bg); border: 1px dashed var(--primary); color: var(--primary); margin-bottom: 8px; padding: 8px; font-size: 13px; cursor: pointer;">+ Add Custom Note</button>
-      <textarea id="additionalNoteInput" placeholder="General additional notes (optional)..." style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; background: var(--input-bg); color: var(--text); box-sizing: border-box; outline: none; min-height: 80px; resize: vertical;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      <div id="checklistFooter" style="padding: 0 14px 10px; background: var(--bg);">
+        <div id="requestsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;"></div>
+        <button id="addRequestBtn" type="button" class="footer-btn" style="width: 100%; background: var(--input-bg); border: 1px dashed var(--green); color: var(--green); margin-bottom: 8px; padding: 8px; font-size: 13px; cursor: pointer;">+ Add Request</button>
+        
+        <div id="customNotesList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;"></div>
+        <button id="addCustomNoteBtn" type="button" class="footer-btn" style="width: 100%; background: var(--input-bg); border: 1px dashed var(--primary); color: var(--primary); margin-bottom: 8px; padding: 8px; font-size: 13px; cursor: pointer;">+ Add Custom Note</button>
+        <textarea id="additionalNoteInput" placeholder="General additional notes (optional)..." style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; background: var(--input-bg); color: var(--text); box-sizing: border-box; outline: none; min-height: 80px; resize: vertical;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
     </div>
 
     <footer class="app-footer">
